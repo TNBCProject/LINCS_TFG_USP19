@@ -1,1 +1,104 @@
 #Código hecho en R
+
+library(dplyr)
+library(openxlsx)
+
+df <- read.xlsx("all_scenarios_limit5.xlsx", sheet = 1)
+
+#Cálculo de métricas
+new_df <- df %>%
+  rowwise() %>%
+  mutate(
+    # Cantidad total de umbrales pasados (celdas no vacías)
+    quantity_values = sum(!is.na(c_across(2:61))),
+
+    # Si la perturbación pasa o no el último umbral
+    last_col_present = ifelse(!is.na(c_across(61)), TRUE, FALSE),
+
+    # Cantidad de umbrales pasados dentro de los 5 más estrictos
+    last_5_cols = sum(!is.na(c_across(57:61))),
+
+    # Cantidad de umbrales pasados dentro de los 10 más estrictos
+    last_10_cols = sum(!is.na(c_across(52:61))),
+
+    # Cantidad máxima de umbrales consecutivos pasados
+    max_consecutive = {
+      logical_sequence <- !is.na(c_across(2:61))
+      rle_lengths <- rle(logical_sequence)$lengths
+      rle_values <- rle(logical_sequence)$values
+      max(rle_lengths[rle_values], na.rm = TRUE)
+    },
+
+    # Ponderación según el umbral pasado y los valores Z asociados
+    weighted_sum = abs(sum(c_across(2:61) * 1:60, na.rm = TRUE) / sum(1:60, na.rm = TRUE)),
+
+    # Cálculo para saber si la perturbación es mimicker o reverser
+    normal_sum = sum(c_across(2:61), na.rm = TRUE),
+    mimicker_or_reverser = ifelse(normal_sum < 0, "reverser", "mimicker")
+
+    # Suma absoluta de los valores Z de cada perturbación
+    absolute_sum = abs(normal_sum),
+
+
+  ) %>%
+  ungroup() %>%
+
+# Opcional: Guardado de los datos en un excel. La primera columna contiene los IDs, el resto las métricas
+select(ID = 1, quantity_values, last_5_cols, last_10_cols, max_consecutive,
+         weighted_sum, absolute_sum, last_col_present, mimicker_or_reverser)  # Select only ID and filters
+write.xlsx(new_df, "filtered_data5a.xlsx")
+
+# Cálculo de las perturbaciones con mejores valores para cada métrica
+get_top_ids <- function(df, filter_name, top_n = 10) {
+  if(filter_name != "mimicker_or_reverser"){
+    if (filter_name == "last_col_present") {
+      return(df %>% filter(last_col_present) %>% pull(ID))
+    } else {
+      df_sorted <- df %>%
+        arrange(desc(.data[[filter_name]]))
+
+      cutoff_value <- df_sorted[[filter_name]][top_n]
+
+      df_sorted %>%
+        filter(.data[[filter_name]] >= cutoff_value) %>%
+        pull(ID) %>%
+        unique()
+    }
+  }
+}
+
+# Creado de una nueva matriz para aplicarle los filtros
+create_filter_matrix <- function(df, filter_names) {
+  ids <- unique(unlist(lapply(filter_names, function(f) get_top_ids(df, f))))
+
+  ids <- ids[!is.na(ids)]
+
+  matrix_data <- as.data.frame(matrix(FALSE, nrow = length(ids), ncol = length(filter_names)))
+  rownames(matrix_data) <- ids
+  colnames(matrix_data) <- filter_names
+
+  for (filter_name in filter_names) {
+    if (filter_name != "last_col_present") {
+      top_ids <- get_top_ids(df, filter_name, 10)
+    } else {
+      top_ids <- get_top_ids(df, filter_name)
+    }
+    matrix_data[rownames(matrix_data) %in% top_ids, filter_name] <- TRUE
+  }
+
+  matrix_data <- cbind(ID = rownames(matrix_data), matrix_data)
+  rownames(matrix_data) <- NULL
+  colnames(matrix_data)[1] <- "ID"
+
+  return(matrix_data)
+}
+
+# Adición de las perturbaciones filtradas a una nueva hoja de Excel
+
+filter_names <- c("quantity_values", "last_5_cols", "last_10_cols", "max_consecutive", "weighted_sum", "absolute_sum", "last_col_present", "mimicker_or_reverser")
+filter_matrix <- create_filter_matrix(new_df, filter_names)
+
+wb <- loadWorkbook("filtered_data5a.xlsx")
+addWorksheet(wb, "Top_Filtered")
+writeData(wb, sheet = "Top_Filtered", filter_matrix)
+saveWorkbook(wb, "filtered_data5a.xlsx", overwrite = TRUE)

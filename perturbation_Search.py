@@ -38,15 +38,6 @@ all_databases = ["human_GEO", "gtex_age_sigs", "LINCS chemical perturbagen signa
                      "l1000_lig", "LINCS consensus gene (CGS) knockdown signatures", "l1000_mean_xpr",
                      "l1000_mean_cp", "l1000_cp", "l1000_aby", "l1000_xpr", "l1000_oe"]
 
-
-''' 
-Bases de datos utilizadas: 
-    "LINCS L1000 Antibody Perturbations (2021)": "l1000_aby"
-    "LINCS L1000 Ligand Perturbations (2021)": "l1000_lig"
-    "LINCS L1000 Chemical Perturbations (2021)": "l1000_cp"
-'''
-
-
 # Bucle para laa búsqueda y guardado de perturbaciones. 
 # Plantea 60 escenarios desde la mediana hasta que solo un gen pasa el umbral.
 for i in range(temp):
@@ -73,6 +64,7 @@ for i in range(temp):
     # Bucle para buscar en las bases de datos de SigCom
     for mydb in all_databases:
 
+        #Conversión de los nombres de los genes a UUIDs
         payload = {
             "filter": {
                 "where": {
@@ -100,7 +92,7 @@ for i in range(temp):
             elif symbol in input_gene_set["down_genes"]:
                 for_enrichment["down_entities"].append(e["id"])
 
-        # EXPLICAR
+        # Búsqueda de perturbaciones usando ranktwosided
         query = {
             **for_enrichment,
             "limit": 5,
@@ -115,8 +107,10 @@ for i in range(temp):
             ii["z-down"] = -ii["z-down"]
             ii["direction-down"] = -ii["direction-down"]
 
+
         sigids = {i["uuid"]: i for i in results["results"]}
 
+        # Recuperación de la metadata
         payload = {
             "filter": {
                 "where": {
@@ -130,7 +124,7 @@ for i in range(temp):
         res = requests.post(METADATA_API + "signatures/find", json=payload)
         signatures = res.json()
 
-        ## Merge the scores and the metadata
+        # Conectar los valores Z con la metadata
         for sig in signatures:
             uid = sig["id"]
             scores = sigids[uid]
@@ -142,6 +136,12 @@ for i in range(temp):
         all_dfs.append(pd.json_normalize(signatures))
 
     # Selección de las 3 bases de datos a estudiar
+    ''' 
+    Bases de datos utilizadas: 
+        "LINCS L1000 Antibody Perturbations (2021)": "l1000_aby"
+        "LINCS L1000 Ligand Perturbations (2021)": "l1000_lig"
+        "LINCS L1000 Chemical Perturbations (2021)": "l1000_cp"
+    '''
     df_merged_1 = pd.merge(all_dfs[6], all_dfs[10], how='outer')
     df_merged = pd.merge(df_merged_1, all_dfs[11], how='outer')
 

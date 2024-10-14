@@ -5,10 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="01827c5a-fa0a-40ad-b693-ffce9160faea" name="Changes" comment="inicial">
+      <change beforePath="$PROJECT_DIR$/.idea/LINCS_TFG_USP19.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/LINCS_TFG_USP19.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cellinfo_beta.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/metadata_Search" beforeDir="false" afterPath="$PROJECT_DIR$/metadata_Search" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/perturbation_Search.py" beforeDir="false" afterPath="$PROJECT_DIR$/perturbation_Search.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/siginfo_beta.txt" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,6 +25,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "CamilaContestabile"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/CamilaContestabile/LINCS_TFG_USP19.git",
+    "accountId": "95c820a9-0137-4401-921a-88f6ea56b63e"
+  }
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 5
 }</component>
@@ -75,7 +87,7 @@
       <workItem from="1728906461557" duration="733000" />
       <workItem from="1728907250715" duration="106000" />
       <workItem from="1728907870161" duration="36000" />
-      <workItem from="1728907915437" duration="315000" />
+      <workItem from="1728907915437" duration="2036000" />
     </task>
     <task id="LOCAL-00001" summary="inicial">
       <option name="closed" value="true" />
@@ -101,7 +113,15 @@
       <option name="project" value="LOCAL" />
       <updated>1728906921814</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="inicial">
+      <option name="closed" value="true" />
+      <created>1728908364895</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1728908364895</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

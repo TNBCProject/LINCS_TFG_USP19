@@ -1,1 +1,112 @@
 #Código hecho en R
+
+#import write
+library(openxlsx)
+
+# Se asume que las tablas cellinfo_beta, siginfo_beta, y top_filtered ya están cargadas en el entorno
+# cellinfo_beta y siginfo_beta se descargan de https://clue.io/data/CMap2020#LINCS2020
+# top_filtered es la segunda hoja del excel armado con el código "applied filters"
+
+cellinfo <- cellinfo_beta
+siginfo <- siginfo_beta
+
+# Función para extraer la metadata de 'meta.cmap_id'
+extract_metadata <- function(meta_cmap_id) {
+
+  # Buscar la información de la perturbación en la tabla siginfo_beta usando la columna sig_id
+  info_pert <- siginfo[siginfo$sig_id == meta_cmap_id,
+                               c("pert_mfc_id", "pert_dose", "pert_dose_unit", "pert_time", "pert_time_unit","pert_type")]
+
+  # Extraer la línea celular del ID
+  parts <- strsplit(meta_cmap_id, ":")[[1]]
+  previous <- parts[1]
+  parts_component <- strsplit(previous, "_")[[1]]
+  if (length(parts_component) >= 2) {
+    cell_line <- parts_component[2]
+  } else {
+    cell_line <- NA
+  }
+
+  # Buscar la información de la línea celular en cellinfo_beta
+  info_cell_line <- cellinfo[cellinfo$cell_iname == cell_line,
+                                 c("cell_iname", "cell_type", "cell_lineage", "donor_ethnicity", "subtype", "primary_disease")]
+
+  # Control para verificar si se encontró la línea celular
+  if (nrow(info_cell_line) > 0) {
+    cell_iname <- info_cell_line$cell_iname
+    cell_type <- info_cell_line$cell_type
+    cell_lineage <- info_cell_line$cell_lineage
+    donor_ethnicity <- info_cell_line$donor_ethnicity
+    subtype <- info_cell_line$subtype
+    primary_disease <- info_cell_line$primary_disease
+  } else {
+    # Si no se encuentra la línea celular, asignar NA
+    cell_iname <- NA
+    cell_type <- NA
+    cell_lineage <- NA
+    donor_ethnicity <- NA
+    subtype <- NA
+    primary_disease <- NA
+  }
+
+  # Control para verificar si se encontró la perturbación y extraer los valores correspondientes
+  if (nrow(info_pert) > 0) {
+    pert_id <- info_pert$pert_mfc_id
+    pert_dose <- info_pert$pert_dose
+    pert_dose_unit <- info_pert$pert_dose_unit
+    pert_time <- info_pert$pert_time
+    pert_time_unit <- info_pert$pert_time_unit
+    pert_type <- info_pert$pert_type
+  } else {
+    # Si no se encuentra la perturbación, asignar NA
+    pert_id <- NA
+    pert_dose <- NA
+    pert_dose_unit <- NA
+    pert_time <- NA
+    pert_time_unit <- NA
+    pert_type <- NA
+  }
+
+  # Crear un dataframe con la información extraída, asegurando que meta.cmap_id sea la primera columna
+  metadata <- data.frame(
+    meta_cmap_id = meta_cmap_id,
+    cell_iname = cell_iname,
+    cell_type = cell_type,
+    cell_lineage = cell_lineage,
+    donor_ethnicity = donor_ethnicity,
+    subtype = subtype,
+    primary_disease = primary_disease,
+    pert_id = pert_id,
+    pert_dose = pert_dose,
+    pert_dose_unit = pert_dose_unit,
+    pert_time = pert_time,
+    pert_time_unit = pert_time_unit,
+    pert_type = if(pert_type=="trt_cp"){
+          pert_type="Chemical"
+      }else if(pert_type=="trt_lig"){
+          pert_type = "Ligand"
+      }else{
+          pert_type = "Antibody"
+      },
+    MoR = top_filtered$mimicker_or_reverser,
+    stringsAsFactors = FALSE
+  )
+
+  return(metadata)
+}
+
+# Aplicar la función a todos los meta_cmap_ids de la tabla top_filtered en lugar de raw_data
+meta_cmap_ids <- top_filtered$ID
+
+metadata_list_top_filtered <- lapply(meta_cmap_ids, extract_metadata)
+
+# Unir toda la metadata en un solo dataframe
+metadata_final_top_filtered <- do.call(rbind, metadata_list_top_filtered)
+
+# Eliminar duplicados en caso de que existan
+metadata_final_top_filtered <- unique(metadata_final_top_filtered)
+
+# Mostrar la tabla final
+print(metadata_final_top_filtered)
+
+write.xlsx(metadata_final_top_filtered, "metadata_top_filtered.xlsx")
