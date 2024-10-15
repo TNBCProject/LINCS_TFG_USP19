@@ -46,7 +46,7 @@ new_df <- df %>%
 # Opcional: Guardado de los datos en un excel. La primera columna contiene los IDs, el resto las métricas
 select(ID = 1, quantity_values, last_5_cols, last_10_cols, max_consecutive,
          weighted_sum, absolute_sum, last_col_present, mimicker_or_reverser)  # Select only ID and filters
-write.xlsx(new_df, "filtered_data5a.xlsx")
+write.xlsx(new_df, "filtered_data5.xlsx")
 
 # Cálculo de las perturbaciones con mejores valores para cada métrica
 get_top_ids <- function(df, filter_name, top_n = 10) {
@@ -86,6 +86,11 @@ create_filter_matrix <- function(df, filter_names) {
     matrix_data[rownames(matrix_data) %in% top_ids, filter_name] <- TRUE
   }
 
+  for (id in ids) {
+    # Copiar el contenido de la columna "mimicker_or_reverser" de df a la nueva matriz
+    mimicker_reverser_value <- df %>% filter(ID == id) %>% pull(mimicker_or_reverser)
+    matrix_data[rownames(matrix_data) == id, "mimicker_or_reverser"] <- mimicker_reverser_value
+  }
   matrix_data <- cbind(ID = rownames(matrix_data), matrix_data)
   rownames(matrix_data) <- NULL
   colnames(matrix_data)[1] <- "ID"
@@ -98,7 +103,7 @@ create_filter_matrix <- function(df, filter_names) {
 filter_names <- c("quantity_values", "last_5_cols", "last_10_cols", "max_consecutive", "weighted_sum", "absolute_sum", "last_col_present", "mimicker_or_reverser")
 filter_matrix <- create_filter_matrix(new_df, filter_names)
 
-wb <- loadWorkbook("filtered_data5a.xlsx")
+wb <- loadWorkbook("filtered_data5.xlsx")
 addWorksheet(wb, "Top_Filtered")
 writeData(wb, sheet = "Top_Filtered", filter_matrix)
-saveWorkbook(wb, "filtered_data5a.xlsx", overwrite = TRUE)
+saveWorkbook(wb, "filtered_data5.xlsx", overwrite = TRUE)

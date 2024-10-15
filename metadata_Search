@@ -67,6 +67,14 @@ extract_metadata <- function(meta_cmap_id) {
     pert_type <- NA
   }
 
+  # Buscar el valor de mimicker_or_reverser en la tabla top10 (evitar duplicados)
+  mimicker_or_reverser <- top_filtered[top_filtered$ID == meta_cmap_id, "mimicker_or_reverser"]
+  if (length(mimicker_or_reverser) > 0) {
+    mimicker_or_reverser <- mimicker_or_reverser[1]  # Asegurarse de obtener un solo valor por ID
+  } else {
+    mimicker_or_reverser <- NA  # Si no se encuentra, asignar NA
+  }
+
   # Crear un dataframe con la información extraída, asegurando que meta.cmap_id sea la primera columna
   metadata <- data.frame(
     meta_cmap_id = meta_cmap_id,
@@ -88,7 +96,7 @@ extract_metadata <- function(meta_cmap_id) {
       }else{
           pert_type = "Antibody"
       },
-    MoR = top_filtered$mimicker_or_reverser,
+    MoR = mimicker_or_reverser,
     stringsAsFactors = FALSE
   )
 
