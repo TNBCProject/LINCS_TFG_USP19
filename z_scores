@@ -1,0 +1,59 @@
+
+library(readxl)
+library(ggplot2)
+
+# Cargar los datos desde Excel (asumiendo que se encuentran en la primera hoja)
+file_path <- "all_scenarios_limit5.xlsx"
+data <- read_excel(file_path, skip = 1)  # La primera fila contiene los indicadores de cada umbral
+
+# Eliminar la primera columna (columna de ID) ya que no es necesaria para el análisis.
+z_values <- data[,-1]
+
+# Convertir los datos en un vector para facilitar el análisis.
+z_values_vector <- unlist(z_values)
+
+# Separar el conjunto de datos en dos grupos: mimickers (valores positivos) y reversers (valores negativos).
+mimickers <- z_values_vector[z_values_vector > 0]
+reversers <- z_values_vector[z_values_vector < 0]
+
+# Calcular estadísticas para los mimickers (máximo, mínimo, media y desviación estándar).
+stats_mimickers <- data.frame(
+  Type = "Mimickers",
+  Metric = c("Maximum", "Minimum", "Mean", "Standard Deviation"),
+  Value = c(max(mimickers, na.rm = TRUE),
+            min(mimickers, na.rm = TRUE),
+            mean(mimickers, na.rm = TRUE),
+            sd(mimickers, na.rm = TRUE))
+)
+
+# Calcular estadísticas para los reversers (máximo, mínimo, media y desviación estándar).
+stats_reversers <- data.frame(
+  Type = "Reversers",
+  Metric = c("Maximum", "Minimum", "Mean", "Standard Deviation"),
+  Value = c(max(reversers, na.rm = TRUE),
+            min(reversers, na.rm = TRUE),
+            mean(reversers, na.rm = TRUE),
+            sd(reversers, na.rm = TRUE))
+)
+
+# Combinar las estadísticas de mimickers y reversers en un único data frame.
+combined_stats <- rbind(stats_mimickers, stats_reversers)
+
+# Exportar las estadísticas combinadas a un archivo CSV.
+write.csv(combined_stats, "perturbations_Zdistribution_limit5.csv", row.names = FALSE)
+
+#Crear un gráfico para visualizar la distribución de los valores Z para ambos grupos (mimickers y reversers).
+plot_data <- data.frame(
+  Z_values = c(mimickers, reversers),
+  Type = factor(rep(c("Mimickers", "Reversers"), times = c(length(mimickers), length(reversers))))
+)
+
+combined_plot <- ggplot(plot_data, aes(x = Z_values, fill = Type)) +
+  geom_histogram(position = "identity", alpha = 0.6, binwidth = 0.5, color = "black") +
+  scale_fill_manual(values = c("Mimickers" = "green", "Reversers" = "red")) +
+  labs(title = "Distribution of Z values",
+       x = "Z values", y = "Frequency") +
+  theme_minimal()
+
+# Guardar el gráfico en un archivo .png
+ggsave("Zplot_limit5.png", plot = combined_plot)
