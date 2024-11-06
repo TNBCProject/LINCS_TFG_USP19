@@ -16,7 +16,7 @@ Este proyecto está orientado al análisis de perturbaciones utilizando la líne
 
 ## Descripción General
 
-El proyecto emplea análisis computacional para investigar las respuestas de las células a distintas perturbaciones, tomando en cuenta la expresión génica diferencial en la línea celular **MDA-MB-231** con la anulación del gen **USP19**. Mediante el uso de bases de datos **SigCom** y **LINCS**, se busca identificar mimickers (compuestos que mimetizan la perturbación) y reversers (compuestos que revierten el estado patológico).
+El proyecto emplea un análisis computacional para investigar las respuestas de las células a distintas perturbaciones, tomando en cuenta la expresión génica diferencial en la línea celular **MDA-MB-231** con la anulación del gen **USP19**. Mediante el uso de bases de datos **SigCom** y **LINCS**, se busca identificar mimickers (compuestos que mimetizan la perturbación) y reversers (compuestos que revierten el estado patológico).
 
 El flujo de trabajo abarca desde la búsqueda de perturbaciones hasta el análisis de la metadata de estas perturbaciones, utilizando un conjunto de filtros y métricas que ayudan a priorizar los resultados.
 
@@ -105,5 +105,5 @@ El script también genera una visualización de la distribución de los valores 
 Para más información sobre este proyecto, contacta a:
 
 **Nombre:** Agustina Verschoor, Camila Contestabile. 
-**Email:** agustina.verschoor@ing.austral.edu.ar, camila.contestabile@ing.austral.edu.ar
+**Email:** verschooragustina@gmail.com, camilacontestabile@gmail.com
 
