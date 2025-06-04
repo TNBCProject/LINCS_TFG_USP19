@@ -1,109 +1,105 @@
-# Proyecto LINCS_TFG_USP19
+# LINCS\_TFG\_USP19 Project
 
-Este proyecto está orientado al análisis de perturbaciones utilizando la línea celular MDA-MB-231, en la que se ha anulado el gen **USP19**. Se utilizan diferentes scripts para buscar y analizar firmas genéticas conectadas con la perturbación de USP19, utilizando bases de datos de **LINCS** y el motor de busqueda **SigCom**. El objetivo final es identificar compuestos químicos o perturbaciones que puedan revertir o mimetizar el estado patológico de las células.
+This project is focused on the analysis of perturbations using the **MDA-MB-231** cell line, in which the **USP19** gene has been knocked out. Different scripts are used to search for and analyze gene signatures connected with the perturbation of USP19, using **LINCS** databases and the **SigCom** search engine. The ultimate goal is to identify chemical compounds or perturbations that could reverse or mimic the pathological state of the cells.
 
-## Índice
+## Index
 
-1. [Descripción General](#descripción-general)
-2. [Requisitos](#requisitos)
-3. [Estructura del Proyecto](#estructura-del-proyecto)
-   - [perturbation_Search.py](#perturbation_searchpy)
-   - [applied_Filters](#applied_filters)
-   - [metadata_Search](#metadata_search)
-   - [z_scores](#z_scores)
-4. [Uso del Proyecto](#uso-del-proyecto)
-5. [Contacto](#contacto)
+1. [General Description](#general-description)
+2. [Requirements](#requirements)
+3. [Project Structure](#project-structure)
 
-## Descripción General
+   * [perturbation\_Search.py](#perturbation_searchpy)
+   * [applied\_Filters](#applied_filters)
+   * [metadata\_Search](#metadata_search)
+   * [z\_scores](#z_scores)
+4. [Project Usage](#project-usage)
 
-El proyecto emplea un análisis computacional para investigar las respuestas de las células a distintas perturbaciones, tomando en cuenta la expresión génica diferencial en la línea celular **MDA-MB-231** con la anulación del gen **USP19**. Mediante el uso de bases de datos **SigCom** y **LINCS**, se busca identificar mimickers (compuestos que mimetizan la perturbación) y reversers (compuestos que revierten el estado patológico).
+## General Description
 
-El flujo de trabajo abarca desde la búsqueda de perturbaciones hasta el análisis de la metadata de estas perturbaciones, utilizando un conjunto de filtros y métricas que ayudan a priorizar los resultados.
+The project employs a computational analysis to investigate cellular responses to various perturbations, considering differential gene expression in the **MDA-MB-231** cell line with the **USP19** gene knockout. Using **SigCom** and **LINCS** databases, it aims to identify **mimickers** (compounds that mimic the perturbation) and **reversers** (compounds that reverse the pathological state).
 
-## Requisitos
+The workflow ranges from the search for perturbations to the analysis of their metadata, using a set of filters and metrics that help prioritize results.
 
-- Python 3.x
-- R
-- Librerías necesarias:
-  - `numpy`
-  - `pandas`
-  - `requests`
-  - `openxlsx` (R)
-  - `dplyr` (R)
-  - `ggplot2` (R)
-  
-## Estructura del Proyecto
+## Requirements
 
-### perturbation_Search.py
+* Python 3.x
+* R
+* Required libraries:
 
-Este script ejecuta la búsqueda de perturbaciones relacionadas con la anulación de **USP19**. Utiliza los valores de *log2FoldChange* para filtrar los genes significativamente regulados de forma positiva y negativa, y luego ejecuta una búsqueda en bases de datos de **SigCom LINCS**. Los resultados son almacenados en un archivo **Excel** llamado `all_scenarios_limit5.xlsx`.
+  * `numpy`
+  * `pandas`
+  * `requests`
+  * `openxlsx` (R)
+  * `dplyr` (R)
+  * `ggplot2` (R)
 
-- **Input:** `USP19_res_table.txt` (archivo con expresión génica)
-- **Output:** `all_scenarios_limit5.xlsx` (archivo con los ID de las perturbaciones y los valores Z asociados)
-- **Librerías:** `numpy`, `pandas`, `requests`
-  
-### applied_Filters
+## Project Structure
 
-Este archivo de R filtra y calcula métricas adicionales basadas en los resultados de la búsqueda de perturbaciones de **USP19**.
+### perturbation\_Search.py
 
-- **Input:** `all_scenarios_limit5.xlsx`
-- **Output:** `filtered_data5.xlsx` (archivo con las perturbaciones filtradas y métricas adicionales)
-- **Métricas Calculadas:**
-  - **quantity_values:** Número total de umbrales pasados por cada perturbación.
-  - **last_col_present:** Si la perturbación pasa o no el último umbral.
-  - **last_5_cols:** Número de umbrales pasados dentro de los 5 más estrictos.
-  - **last_10_cols:** Número de umbrales pasados dentro de los 10 más estrictos.
-  - **max_consecutive:** Cantidad máxima de umbrales consecutivos pasados.
-  - **weighted_sum:** Suma ponderada según el umbral pasado y los valores Z asociados.
-  - **absolute_sum:** Suma absoluta de los valores Z.
-  - **mimicker_or_reverser:** Clasificación de la perturbación como mimicker o reverser.
+This script performs the search for perturbations related to **USP19** knockout. It uses *log2FoldChange* values to filter significantly upregulated and downregulated genes, then runs a search on **SigCom LINCS** databases. The results are stored in an **Excel** file named `all_scenarios_limit5.xlsx`.
 
-### metadata_Search
+* **Input:** `USP19_res_table.txt` (gene expression file)
+* **Output:** `all_scenarios_limit5.xlsx` (file with perturbation IDs and associated Z values)
+* **Libraries:** `numpy`, `pandas`, `requests`
 
-Este archivo de R extrae la metadata relacionada con las perturbaciones filtradas en el paso anterior. Utiliza las tablas **cellinfo_beta** y **siginfo_beta** descargadas de **CLUE.io** para enriquecer los datos con información adicional sobre las líneas celulares y los compuestos.
+### applied\_Filters
 
-- **Input:** `filtered_data5.xlsx`, `cellinfo_beta`, `siginfo_beta`
-- **Output:** `metadata_top_filtered.xlsx`
-- **Metadata Extraída:**
-  - **cell_iname:** Nombre de la línea celular.
-  - **cell_type:** Tipo de célula (ej. epitelial, mesenquimal, etc.).
-  - **cell_lineage:** Linaje celular (origen de la célula).
-  - **donor_ethnicity:** Etnicidad del donante de la línea celular.
-  - **subtype:** Subtipo de la célula, si aplica.
-  - **primary_disease:** Enfermedad primaria asociada a la célula.
-  - **pert_id:** ID del compuesto/perturbación.
-  - **pert_dose:** Dosis del compuesto utilizado.
-  - **pert_dose_unit:** Unidad de medida de la dosis (ej. micromolar).
-  - **pert_time:** Tiempo de exposición a la perturbación.
-  - **pert_time_unit:** Unidad de tiempo (ej. horas).
-  - **pert_type:** Tipo de perturbación (químico, ligando o anticuerpo).
-  - **MoR:** Indicador de si la perturbación es un mimicker o un reverser.
+This R script filters and calculates additional metrics based on the results of the **USP19** perturbation search.
 
-### z_scores
+* **Input:** `all_scenarios_limit5.xlsx`
+* **Output:** `filtered_data5.xlsx` (file with filtered perturbations and additional metrics)
+* **Calculated Metrics:**
 
-Este archivo de R se encarga de calcular y visualizar la distribución de los valores Z obtenidos en los análisis anteriores.
+  * **quantity\_values:** Total number of thresholds passed by each perturbation.
+  * **last\_col\_present:** Whether the perturbation passes the last threshold.
+  * **last\_5\_cols:** Number of thresholds passed within the 5 most stringent.
+  * **last\_10\_cols:** Number of thresholds passed within the 10 most stringent.
+  * **max\_consecutive:** Maximum number of consecutive thresholds passed.
+  * **weighted\_sum:** Weighted sum according to the threshold passed and the associated Z values.
+  * **absolute\_sum:** Absolute sum of Z values.
+  * **mimicker\_or\_reverser:** Classification of the perturbation as mimicker or reverser.
 
-- **Input:** `all_scenarios_limit5.xlsx`
-- **Output:** `perturbations_Zdistribution_limit5.csv`, `Zplot_limit5.png`
-- **Métricas Calculadas:**
-  - **Maximum:** Valor Z máximo de mimickers y reversers.
-  - **Minimum:** Valor Z mínimo de mimickers y reversers.
-  - **Mean:** Valor medio de los Z-scores de mimickers y reversers.
-  - **Standard Deviation:** Desviación estándar de los Z-scores de mimickers y reversers.
+### metadata\_Search
 
-El script también genera una visualización de la distribución de los valores Z para mimickers y reversers en un gráfico de histograma.
+This R script extracts metadata related to the perturbations filtered in the previous step. It uses **cellinfo\_beta** and **siginfo\_beta** tables downloaded from **CLUE.io** to enrich the data with additional information about cell lines and compounds.
 
-## Uso del Proyecto
+* **Input:** `filtered_data5.xlsx`, `cellinfo_beta`, `siginfo_beta`
+* **Output:** `metadata_top_filtered.xlsx`
+* **Extracted Metadata:**
 
-1. Ejecutar el script `perturbation_Search.py` para buscar las perturbaciones utilizando los datos de expresión génica de USP19.
-2. Filtrar y calcular métricas adicionales usando el archivo `applied_Filters`.
-3. Calcular y visualizar las distribuciones de valores Z usando el script `z_scores`.
-4. Extraer la metadata relacionada a las perturbaciones filtradas con el script `metadata_Search`
+  * **cell\_iname:** Name of the cell line.
+  * **cell\_type:** Type of cell (e.g., epithelial, mesenchymal, etc.).
+  * **cell\_lineage:** Cell lineage (origin of the cell).
+  * **donor\_ethnicity:** Ethnicity of the cell line donor.
+  * **subtype:** Subtype of the cell, if applicable.
+  * **primary\_disease:** Primary disease associated with the cell.
+  * **pert\_id:** Compound/perturbation ID.
+  * **pert\_dose:** Dose of the compound used.
+  * **pert\_dose\_unit:** Unit of dose measurement (e.g., micromolar).
+  * **pert\_time:** Exposure time to the perturbation.
+  * **pert\_time\_unit:** Time unit (e.g., hours).
+  * **pert\_type:** Type of perturbation (chemical, ligand, or antibody).
+  * **MoR:** Indicator of whether the perturbation is a mimicker or a reverser.
 
-## Contacto
+### z\_scores
 
-Para más información sobre este proyecto, contacta a:
+This R script calculates and visualizes the distribution of Z values obtained in previous analyses.
 
-**Nombre:** Agustina Verschoor, Camila Contestabile. 
-**Email:** verschooragustina@gmail.com, camilacontestabile@gmail.com
+* **Input:** `all_scenarios_limit5.xlsx`
+* **Output:** `perturbations_Zdistribution_limit5.csv`, `Zplot_limit5.png`
+* **Calculated Metrics:**
 
+  * **Maximum:** Maximum Z value for mimickers and reversers.
+  * **Minimum:** Minimum Z value for mimickers and reversers.
+  * **Mean:** Average Z-score for mimickers and reversers.
+  * **Standard Deviation:** Standard deviation of Z-scores for mimickers and reversers.
+
+The script also generates a histogram showing the distribution of Z values for mimickers and reversers.
+
+## Project Usage
+
+1. Run the `perturbation_Search.py` script to search for perturbations using USP19 gene expression data.
+2. Filter and calculate additional metrics using the `applied_Filters` file.
+3. Calculate and visualize Z-score distributions using the `z_scores` script.
+4. Extract metadata related to the filtered perturbations with the `metadata_Search` script.
